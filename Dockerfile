@@ -1,4 +1,19 @@
-FROM node:4.7
+FROM resin/armv7hf-debian-qemu
+ENV DEBIAN_FRONTEND noninteractive
+
+RUN [ "cross-build-start" ]
+
+RUN apt-get update && \
+    apt-get install -yq \
+            apt-transport-https \
+            curl
+RUN curl -s https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add -
+RUN echo 'deb https://deb.nodesource.com/node_4.x jessie main' > /etc/apt/sources.list.d/nodesource.list
+RUN echo 'deb-src https://deb.nodesource.com/node_4.x jessie main' >> /etc/apt/sources.list.d/nodesource.list
+RUN apt-get update && \
+    apt-get install -yq \
+            nodejs
+
 
 # Install Pimatic Following the Instructions at Pimatic Docs
 # Ref: https://pimatic.org/guide/getting-started/installation/
@@ -15,6 +30,7 @@ RUN chown root:root /etc/init.d/pimatic
 RUN update-rc.d pimatic defaults
 RUN sed -i "s/\"password\": \"\"/\"password\": \"pimatic\"/g" /home/pimatic-app/config.json
 
+RUN [ "cross-build-end" ] 
 # The node Dockerfile sets the entrypoint to "node". We need this to be bash in order to use pimatic.
 ENTRYPOINT ["/bin/bash"]
 
