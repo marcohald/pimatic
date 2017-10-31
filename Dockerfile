@@ -1,7 +1,7 @@
-FROM resin/armv7hf-debian-qemu
+FROM arm32v7/node:4
 ENV DEBIAN_FRONTEND noninteractive
 
-RUN [ "cross-build-start" ]
+#RUN [ "cross-build-start" ]
 
 RUN apt-get update && \
     apt-get install -yq \
@@ -10,12 +10,6 @@ RUN apt-get update && \
             git \
             wget
             
-RUN curl -s https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add - && \
-    echo 'deb https://deb.nodesource.com/node_4.x jessie main' > /etc/apt/sources.list.d/nodesource.list && \
-    echo 'deb-src https://deb.nodesource.com/node_4.x jessie main' >> /etc/apt/sources.list.d/nodesource.list && \
-    apt-get update && \
-    apt-get install -yq \
-            nodejs
 
 # Install sqlite3 to prevent npm from compiling it
 RUN apt-get update && apt-get install -y apt-utils && apt-get install -y sqlite3 libsqlite3-dev && npm install sqlite3 --sqlite=/usr/local
@@ -41,9 +35,10 @@ RUN rm /home/pimatic-app/node_modules/pimatic/startup.coffee \
 
 
 
-RUN [ "cross-build-end" ] 
+#RUN [ "cross-build-end" ] 
 # The node Dockerfile sets the entrypoint to "node". We need this to be bash in order to use pimatic.
 ENTRYPOINT ["/bin/bash"]
 
 # Expose port 80
 EXPOSE 80
+
