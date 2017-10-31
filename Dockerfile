@@ -18,7 +18,7 @@ RUN curl -s https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add -
             nodejs
 
 # Install sqlite3 to prevent npm from compiling it
-RUN apt-get update && apt-get install -y apt-utils && apt-get install -y sqlite3 && npm install sqlite3 --sqlite=/usr/local
+RUN apt-get update && apt-get install -y apt-utils && apt-get install -y sqlite3 libsqlite3-dev && npm install sqlite3 --sqlite=/usr/local
 
 RUN mkdir /home/pimatic-app && cd /home && npm install pimatic --prefix pimatic-app --production && ls
 
