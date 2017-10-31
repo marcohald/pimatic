@@ -4,6 +4,6 @@ services:
 language: bash
 script:
 # prepare qemu
-#- docker run --rm --privileged multiarch/qemu-user-static:register --reset
+- docker run --rm --privileged multiarch/qemu-user-static:register --reset
 # build image
 - docker build -t marcohald/pimatic .
