@@ -158,20 +158,50 @@ module.exports = (env) ->
     variables: {}
     functions: {
       min:
+        description: """
+          Returns the lowest-valued number of the numeric expressions
+          passed to it. If any parameter isn't a number and can't be
+          converted into one the "null" value is returned.
+        """
         args:
           numbers:
+            description: """
+              Zero or more numeric expressions among which the
+              lowest value will be selected and returned. If no expression
+              is provided the null value is returned
+            """
             type: "number"
             multiple: yes
         exec: (args...) -> _.reduce(_.map(args, parseFloat), (a, b) -> Math.min(a,b) )
       max:
+        description: """
+          Returns the highest-valued number of the numeric expressions
+          passed to it. If any parameter isn't a number and can't be
+          converted into one the "null" value is returned
+        """
         args:
           numbers:
+            description: """
+              Zero or more numeric expressions among which the
+              highest value will be selected and returned. If no expression
+              is provided the null value is returned
+            """
             type: "number"
             multiple: yes
         exec: (args...) -> _.reduce(_.map(args, parseFloat), (a, b) -> Math.max(a,b) )
       avg:
+        description: """
+          Returns the average (arithmetic mean) for the numeric
+          expressions passed to it. If any parameter isn't a number
+          and can't be converted into one the "null" value is returned
+        """
         args:
           numbers:
+            description: """
+              Zero or more numeric expressions among which the
+              average is calculated. If no expression
+              is provided the null value is returned
+            """
             type: "number"
             multiple: yes
         exec: (args...) ->  _.reduce(_.map(args, parseFloat), (a, b) -> a+b) / args.length    
@@ -197,6 +227,28 @@ module.exports = (env) ->
             optional: yes
         exec: (base, exponent=2) ->
           return Math.pow(base, exponent)
+      abs:
+        description: """
+          Returns the absolute value of a number
+        """
+        args:
+          x:
+            description: "A numeric expression"
+            type: "number"
+        exec: (x) ->
+          return Math.abs(x)
+      sign:
+        description: """
+          Returns the sign of the value evaluated from the given
+          numeric expression, indicating whether
+          the number is positive (1), negative (-1) or zero (0)
+        """
+        args:
+          x:
+            description: "A numeric expression"
+            type: "number"
+        exec: (x) ->
+          return Math.sign(x)
       sqrt:
         description: "Returns the square root of a number"
         args:
@@ -224,6 +276,22 @@ module.exports = (env) ->
             type: "number"
         exec: (x) ->
           return Math.acos(x)
+      log:
+        description: """
+          Returns the logarithm for a given
+          number and base. If no base is provided,
+          the logarithmus naturalis (base e) is assumed.
+        """
+        args:
+          x:
+            description: "A numeric expression"
+            type: "number"
+          base:
+            description: "A numeric expression"
+            type: "number"
+            optional: yes
+        exec: (x, base) ->
+          return Math.log(x) / if base? then Math.log(base) else 1
       round:
         args:
           number:
@@ -231,10 +299,8 @@ module.exports = (env) ->
           decimals:
             type: "number"
             optional: yes
-        exec: (value, decimals) -> 
-          unless decimals?
-            decimals = 0
-          multiplier = Math.pow(10, decimals)
+        exec: (value, decimals) ->
+          multiplier = Math.pow(10, decimals ? 0)
           return Math.round(value * multiplier) / multiplier
       roundToNearest:
         args:
@@ -246,6 +312,22 @@ module.exports = (env) ->
           steps = String(steps)
           decimals = (if steps % 1 != 0 then steps.substr(steps.indexOf(".") + 1).length else 0)
           return Number((Math.round(number / steps) * steps).toFixed(decimals))
+      trunc:
+        description: """
+          Returns the given number truncated at at the given decimal
+          place. If the decimal place is omitted or the value 0 is set, the
+          integer part is returned by removing any fractional digits. Note, this
+          function is equivalent to symmetrical rounding towards zero.
+        """
+        args:
+          number:
+            type: "number"
+          decimals:
+            type: "number"
+            optional: yes
+        exec: (value, decimals) ->
+          multiplier = Math.pow(10, decimals ? 0)
+          return Math.trunc(value * multiplier) / multiplier
       timeFormat:
         args:
           number:
@@ -281,6 +363,36 @@ module.exports = (env) ->
             type: "string"
             optional: yes
         exec: (format) -> (new Date()).format(if format? then format else 'YYYY-MM-DD hh:mm:ss')
+      diffDate:
+        description: """
+          Returns the difference between to given date strings
+          in milliseconds. Optionally, a format string can be
+          provided to return the difference in "seconds",
+          "minutes", "hours", "days". In this case the result is a real
+          number (float) is returned.
+        """
+        args:
+          startDate:
+            type: "string"
+            optional: no
+          endDate:
+            type: "string"
+            optional: no
+          format:
+            type: "string"
+            optional: yes
+        exec: (startDate, endDate, format) ->
+          diff = Date.parse(endDate) - Date.parse(startDate)
+          switch format
+            when "seconds"
+              diff = diff / 1000
+            when "minutes"
+              diff = diff / 1000 / 60
+            when "hours"
+              diff = diff / 1000 / 60 / 60
+            when "days"
+              diff = diff / 1000 / 60 / 60 / 24
+          return diff
       formatNumber:
         args:
           number:
