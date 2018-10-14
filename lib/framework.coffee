@@ -7,7 +7,7 @@ assert = require 'cassert'
 fs = require "fs"
 JaySchema = require 'jayschema'
 RJSON = require 'relaxed-json'
-i18n = require 'i18n'
+i18n = require 'i18n-pimatic'
 express = require "express"
 methodOverride = require 'method-override'
 connectTimeout = require 'connect-timeout'
@@ -58,6 +58,8 @@ module.exports = (env) ->
       )
       @packageJson = @pluginManager.getInstalledPackageInfo('pimatic')
       env.logger.info "Starting pimatic version #{@packageJson.version}"
+      env.logger.info "Node.js version #{process.versions.node}"
+      env.logger.info "OpenSSL version #{process.versions.openssl}"
       @_loadConfig()
       @pluginManager.pluginsConfig = @config.plugins
       @userManager = new env.users.UserManager(this, @config.users, @config.roles)
@@ -378,6 +380,7 @@ module.exports = (env) ->
             req.sessionOptions.maxAge = auth.loginTime
           else
             req.sessionOptions.maxAge = null
+          #env.logger.info "User login: #{user}"
           res.send({
             success: yes
             username: user
@@ -389,6 +392,7 @@ module.exports = (env) ->
           delete req.session.loginToken
           delete req.session.role
           delete req.session.rememberMe
+          env.logger.error "User login failed: Wrong username or password"
           res.status(401).send({
             success: false
             message: __("Wrong username or password.")
@@ -396,6 +400,8 @@ module.exports = (env) ->
       )
 
       @app.get('/logout', (req, res) =>
+        #if req.session?.username?
+        #  env.logger.info "User logout: #{req.session.username}"
         req.session = null
         res.status(401).send("You are now logged out.")
         return
